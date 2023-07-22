@@ -1,13 +1,23 @@
 const { Configuration, OpenAIApi } = require("openai");
 const readline = require("readline");
 const Spinner = require("cli-spinner").Spinner;
-
+const chalk = require("chalk");
 require("dotenv").config();
+
 const apiKey = process.env.OPENAI_API_KEY;
 
-console.log("Your personal god welcomes you!. Type ctrl+C to cancel anytime");
+//Array to keep the context of previous messages
+const messages = [];
 
-const spinner = new Spinner("processing.. %s");
+console.log(
+  "\n",
+  chalk.yellow(
+    "Your personal GOD welcomes you! (type ctrl+C to cancel anytime)"
+  ),
+  "\n"
+);
+
+const spinner = new Spinner("GOD is thinking.. %s");
 spinner.setSpinnerString("|/-\\");
 
 const rl = readline.createInterface({
@@ -21,26 +31,31 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 async function fetchChatGPTResponse(prompt) {
+  messages.push({ role: "user", content: prompt });
   const completion = await openai.createChatCompletion({
     model: "gpt-3.5-turbo",
-    messages: [{ role: "user", content: prompt }],
+    messages,
   });
   return completion;
 }
 
-async function readLineFromCLI() {
-  rl.question("Ask God: ", async (prompt) => {
+async function readFromCLI() {
+  rl.question(chalk.blueBright("Ask GOD: "), async (prompt) => {
     spinner.start();
     try {
       const response = await fetchChatGPTResponse(prompt);
       const answer = response.data.choices[0].message;
-      spinner.stop();
-      console.log("Ans: ", answer);
+      messages.push(answer);
+      spinner.stop(true);
+      console.log(chalk.greenBright("Ans: ", answer?.content));
+      console.log("--------------", "\n");
+
+      readFromCLI();
     } catch (error) {
-      spinner.stop();
+      spinner.stop(true);
       console.log(error);
     }
   });
 }
 
-readLineFromCLI();
+readFromCLI();

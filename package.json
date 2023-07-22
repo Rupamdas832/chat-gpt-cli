@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "chalk": "^4.1.2",
     "cli-spinner": "^0.2.10",
     "dotenv": "^16.3.1",
     "openai": "^3.3.0",
